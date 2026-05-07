@@ -1,18 +1,16 @@
 ---
 tracker:
   kind: linear
-  project_slug: "symphony-0c79b11b75ea"
+  project_slug: "marvin-context-infrastructure-be2141adb2cc"
+  api_key: $LINEAR_API_KEY
   active_states:
     - Todo
     - In Progress
-    - Merging
-    - Rework
+    - In Review
   terminal_states:
-    - Closed
-    - Cancelled
+    - Done
     - Canceled
     - Duplicate
-    - Done
 polling:
   interval_ms: 5000
 workspace:
