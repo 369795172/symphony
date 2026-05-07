@@ -1,0 +1,3 @@
+# Local tooling (Jenny / OMC); do not commit machine state
+.omc/
+elixir/.omc/
