@@ -121,6 +121,20 @@ When you delegate:
 2. Review the output before applying it to the workspace.
 3. Run validation on the result as you would for your own code.
 
+**Parallel delegation** (for tasks with 2+ independent parts):
+
+```bash
+# Split into parallel jobs with --job-id for result collection
+tools/delegate_agent.sh --job-id "api" --timeout 600 --prompt "Implement API handlers..." &
+tools/delegate_agent.sh --job-id "tests" --timeout 300 --prompt "Write unit tests..." &
+wait
+# Read results from .delegate_log/<job-id>.out
+cat .delegate_log/api.out
+cat .delegate_log/tests.out
+```
+
+For complex sub-tasks, add `--parallel-hint` to authorize the delegate agent to spawn its own subagents internally.
+
 Do NOT delegate: Linear API calls, git commit/push/PR operations, multi-step reasoning that depends on session history, or scope/acceptance decisions.
 
 ## Status map
