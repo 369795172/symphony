@@ -17,21 +17,18 @@ workspace:
   root: ~/code/symphony-workspaces
 hooks:
   after_create: |
-    git clone --depth 1 https://github.com/openai/symphony .
-    if command -v mise >/dev/null 2>&1; then
-      cd elixir && mise trust && mise exec -- mix deps.get
-    fi
+    git clone --depth 1 https://github.com/369795172/rootgrove.git .
   before_remove: |
-    cd elixir && mise exec -- mix workspace.before_remove
+    echo "workspace cleanup for $(basename $(pwd))"
 agent:
   max_concurrent_agents: 10
   max_turns: 20
 codex:
   command: codex --config shell_environment_policy.inherit=all --config 'model="gpt-5.5"' --config model_reasoning_effort=xhigh app-server
   approval_policy: never
-  thread_sandbox: workspace-write
+  thread_sandbox: danger-full-access
   turn_sandbox_policy:
-    type: workspaceWrite
+    type: dangerFullAccess
 ---
 
 You are working on a Linear ticket `{{ issue.identifier }}`
@@ -98,6 +95,33 @@ The agent should be able to talk to Linear, either via a configured Linear MCP s
 - `push`: keep remote branch current and publish updates.
 - `pull`: keep branch updated with latest `origin/main` before handoff.
 - `land`: when ticket reaches `Merging`, explicitly open and follow `.codex/skills/land/SKILL.md`, which includes the `land` loop.
+- `delegate`: offload heavy execution sub-tasks to external CLI agents (Cursor, OpenCode, Claude Code) to reduce token cost. See section above.
+
+## Delegate: offload heavy execution to external agents
+
+For execution-heavy sub-tasks (large code generation, bulk file analysis, test writing), delegate to a cheaper external CLI agent instead of consuming Codex tokens directly.
+
+Read `.codex/skills/delegate/SKILL.md` for the full decision criteria and usage examples.
+
+Quick reference:
+
+```bash
+# Auto mode: tries cursor → opencode → claude (cost-optimized)
+tools/delegate_agent.sh --prompt "Implement X..."
+
+# Force a specific agent
+tools/delegate_agent.sh --agent cursor --prompt "Write tests for Y..."
+
+# Use a specific model via OpenCode
+tools/delegate_agent.sh --agent opencode --model "anthropic/claude-sonnet" --prompt "Analyze Z..."
+```
+
+When you delegate:
+1. Record the delegation in the workpad `Notes` section: `Delegated "<task summary>" to <agent> (<elapsed>s, <output chars>)`.
+2. Review the output before applying it to the workspace.
+3. Run validation on the result as you would for your own code.
+
+Do NOT delegate: Linear API calls, git commit/push/PR operations, multi-step reasoning that depends on session history, or scope/acceptance decisions.
 
 ## Status map
 
